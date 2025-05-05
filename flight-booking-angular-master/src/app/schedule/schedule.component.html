@@ -1,0 +1,199 @@
+<nav class="navbar navbar-expand-lg" style="background-color: #121213;">
+    <div class="collapse navbar-collapse" id="navbarText">
+        <ul class="navbar-nav mr-auto">
+            <li class="nav-item">
+                <a class="nav-link active" href="/dashboard" routerLink="/dashboard">Manage Airlines</a>
+            </li>
+            <li class="nav-item">
+                <a class="nav-link" href="/dashboard/schedule" routerLink="/dashboard/schedule">Manage Schedules</a>
+            </li>
+            <!-- <li class="nav-item">
+                <a class="nav-link" href="/dashboard/coupon" routerLink="/dashboard/coupon">Manage Coupons</a>
+            </li> -->
+        </ul>
+        <button type="submit" class="btn btn-info" style="margin-left:55%" (click)="logout()">Logout</button>
+    </div>
+</nav>
+
+<div class="container mt-4">
+    <div class="card shadow-sm border-0">
+      <div class="card-body">
+        <h3 class="text-center text-primary">Manage Flight Schedules</h3>
+  
+        <form [formGroup]="scheduleForm">
+          <div class="row g-3">
+            <div class="col-md-3">
+              <label class="form-label">Airline Code</label>
+              <ng-multiselect-dropdown formControlName="airline"
+                [placeholder]="'Select Airline'"
+                [settings]="airlineCodeDropdownSettings"
+                [data]="airlineCodeDropdownList"
+                (onSelect)="onAirlineCodeSelect($event)"
+                (onDeSelect)="onAirlineCodeDeSelect($event)">
+              </ng-multiselect-dropdown>
+            </div>
+  
+            <div class="col-md-3">
+              <label class="form-label">Flight Number</label>
+              <input type="number" class="form-control" formControlName="flightNumber" placeholder="Enter Flight Number">
+            </div>
+  
+            <div class="col-md-3">
+              <label class="form-label">From</label>
+              <input type="text" class="form-control" formControlName="departureAirport" placeholder="Departure Airport">
+            </div>
+  
+            <div class="col-md-3">
+              <label class="form-label">To</label>
+              <input type="text" class="form-control" formControlName="arrivalAirport" placeholder="Arrival Airport">
+            </div>
+  
+            <div class="col-md-3">
+              <label class="form-label">Frequency</label>
+              <ng-multiselect-dropdown formControlName="frequency"
+                [placeholder]="'Select Frequency'"
+                [settings]="frequencyDropdownSettings"
+                [data]="frequencyDropdownList"
+                (onSelect)="onFrequencySelect($event)"
+                (onDeSelect)="onFrequencyDeSelect($event)">
+              </ng-multiselect-dropdown>
+            </div>
+  
+            <div class="col-md-3">
+              <label class="form-label">Departure Time</label>
+              <input type="time" class="form-control" formControlName="departureTime">
+            </div>
+  
+            <div class="col-md-3">
+              <label class="form-label">Arrival Time</label>
+              <input type="time" class="form-control" formControlName="arrivalTime">
+            </div>
+  
+            <div class="col-md-3">
+              <label class="form-label">Aircraft Number</label>
+              <input type="text" class="form-control" formControlName="aircraftRegistration" placeholder="Aircraft Number">
+            </div>
+  
+            <div class="col-md-3">
+              <label class="form-label">Seat Count</label>
+              <input type="number" class="form-control" formControlName="seatCount">
+            </div>
+  
+            <div class="col-md-3">
+              <label class="form-label">Ticket Price</label>
+              <input type="number" class="form-control" formControlName="ticketPrice">
+            </div>
+  
+            <div class="col-md-3 d-flex align-items-end">
+              <button class="btn btn-success w-100" (click)="saveFlightSchedule(scheduleForm)">
+                <i class="bi bi-save"></i> Save Schedule
+              </button>
+            </div>
+          </div>
+        </form>
+      </div>
+    </div>
+  </div>
+
+<br><br>
+<div class="container shadow-sm border-0 mt-4">
+    <div class="card-body">
+      <h4 class="text-center text-secondary">Flight Schedule List</h4>
+      <div class="table-responsive">
+        <table class="table table-striped table-hover">
+          <thead class="table-dark">
+            <tr>
+              <th>Airline Code</th>
+              <th>Flight Number</th>
+              <th>From</th>
+              <th>To</th>
+              <th>Frequency</th>
+              <th>Departure Time</th>
+              <th>Arrival Time</th>
+              <th>Aircraft Number</th>
+              <th>Seat Count</th>
+              <th>Ticket Price</th>
+              <th>Actions</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr *ngFor="let schedule of scheduleList">
+              <td>{{schedule.airline.airlineCode}}</td>
+              <td>{{schedule.flightNumber}}</td>
+              <td>{{schedule.departureAirport}}</td>
+              <td>{{schedule.arrivalAirport}}</td>
+              <td>{{schedule.frequency}}</td>
+              <td>{{schedule.departureTime}}</td>
+              <td>{{schedule.arrivalTime}}</td>
+              <td>{{schedule.aircraftRegistration}}</td>
+              <td>{{schedule.seatCount}}</td>
+              <td>{{schedule.ticketPrice}}</td>
+              <td>
+                <button class="btn btn-warning btn-sm me-2" (click)="openModal(editProfileModal, schedule)">
+                  <i class="bi bi-pencil-fill"></i> Edit
+                </button>
+                <button class="btn btn-danger btn-sm" (click)="deleteSchedule(schedule)">
+                  <i class="bi bi-trash-fill"></i> Delete
+                </button>
+              </td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+  </div>
+
+  <ng-template #editProfileModal let-modal>
+    <div class="modal-header">
+      <h5 class="modal-title">Update Flight Schedule</h5>
+      <button type="button" class="close" (click)="modal.dismiss()">
+        <span>&times;</span>
+      </button>
+    </div>
+  
+    <div class="modal-body">
+      <form [formGroup]="updateScheduleForm" (ngSubmit)="updateFlightSchedule(updateScheduleForm)">
+        <div class="row g-3">
+          <input type="hidden" formControlName="id">
+  
+          <div class="col-md-6">
+            <label class="form-label">Airline Code</label>
+            <ng-multiselect-dropdown formControlName="airline"
+              [settings]="updateAirlineCodeDropdownSettings"
+              [data]="updateAirlineCodeDropdownList">
+            </ng-multiselect-dropdown>
+          </div>
+  
+          <div class="col-md-6">
+            <label class="form-label">Flight Number</label>
+            <input type="number" class="form-control" formControlName="flightNumber">
+          </div>
+  
+          <div class="col-md-6">
+            <label class="form-label">From</label>
+            <input type="text" class="form-control" formControlName="departureAirport">
+          </div>
+  
+          <div class="col-md-6">
+            <label class="form-label">To</label>
+            <input type="text" class="form-control" formControlName="arrivalAirport">
+          </div>
+  
+          <div class="col-md-6">
+            <label class="form-label">Departure Time</label>
+            <input type="time" class="form-control" formControlName="departureTime">
+          </div>
+  
+          <div class="col-md-6">
+            <label class="form-label">Arrival Time</label>
+            <input type="time" class="form-control" formControlName="arrivalTime">
+          </div>
+  
+          <div class="modal-footer">
+            <button type="button" class="btn btn-secondary" (click)="modal.dismiss()">Close</button>
+            <button type="submit" class="btn btn-primary">Save Changes</button>
+          </div>
+        </div>
+      </form>
+    </div>
+  </ng-template>

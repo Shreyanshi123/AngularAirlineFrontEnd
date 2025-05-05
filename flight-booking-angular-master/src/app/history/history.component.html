@@ -1,0 +1,62 @@
+<!-- <nav class="navbar navbar-expand-lg" style="background-color: #121213;">
+    <div class="collapse navbar-collapse" id="navbarText">
+        <ul class="navbar-nav mr-auto">
+            <li class="nav-item">
+                <a class="nav-link" href="/home" routerLink="/home">Search Flights </a>
+            </li>
+            <!-- <li class="nav-item">
+                <a class="nav-link" href="/home/booking" routerLink="/home/booking">Booking Flight </a>
+            </li> -->
+            <!-- <li class="nav-item">
+                <a class="nav-link active" href="/home/booking/history" routerLink="/home/booking/history">Booking
+                    History</a>
+            </li>
+            <li class="nav-item">
+                <a class="nav-link" href="/home/booking/manage" routerLink="/home/booking/manage">Manage Booking</a>
+            </li>
+        </ul>
+        <button type="submit" class="btn btn-info" style="margin-left:55%" (click)="logout()">Logout</button>
+    </div>
+</nav>  -->
+
+<div class="container mt-4">
+    <div class="row">
+      <div class="col-md-12">
+        <div class="card shadow-sm border-0">
+          <div class="card-header bg-primary text-white">
+            <h4 class="mb-0">Booking History</h4>
+          </div>
+          <div class="card-body">
+            <div class="table-responsive">
+              <table class="table table-hover table-bordered">
+                <thead class="table-dark">
+                  <tr>
+                    <th>Name</th>
+                    <th>Flight Name</th>
+                    <th>Location</th>
+                    <th>Booking Date</th>
+                    <th>Status</th>
+                    <th>Amount</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  <tr *ngFor="let value of this.bookingHistory">
+                    <td>{{ this.username }}</td>
+                    <td>{{value.airlineName}} - {{value.airlineCode}}</td>
+                    <td>{{value.origin}} → {{value.destination}}</td>
+                    <td>{{value.travelDate}}</td>
+                    <td>
+                      <span class="badge bg-success">{{value.status}}</span>
+                    </td>
+                    <td>
+                      <i class="bi bi-currency-rupee"></i> {{value.price | number}}
+                    </td>
+                  </tr>
+                </tbody>
+              </table>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
