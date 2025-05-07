@@ -11,7 +11,7 @@
                 <a class="nav-link" href="/dashboard/coupon" routerLink="/dashboard/coupon">Manage Coupons</a>
             </li> -->
         </ul>
-        <button type="submit" class="btn btn-info" style="margin-left:55%" (click)="logout()">Logout</button>
+        <button type="submit" class="btn btn-info" style="margin-left:55%">Logout</button>
     </div>
 </nav>
 
@@ -25,11 +25,7 @@
             <div class="col-md-3">
               <label class="form-label">Airline Code</label>
               <ng-multiselect-dropdown formControlName="airline"
-                [placeholder]="'Select Airline'"
-                [settings]="airlineCodeDropdownSettings"
-                [data]="airlineCodeDropdownList"
-                (onSelect)="onAirlineCodeSelect($event)"
-                (onDeSelect)="onAirlineCodeDeSelect($event)">
+                [placeholder]="'Select Airline'">
               </ng-multiselect-dropdown>
             </div>
   
@@ -51,11 +47,7 @@
             <div class="col-md-3">
               <label class="form-label">Frequency</label>
               <ng-multiselect-dropdown formControlName="frequency"
-                [placeholder]="'Select Frequency'"
-                [settings]="frequencyDropdownSettings"
-                [data]="frequencyDropdownList"
-                (onSelect)="onFrequencySelect($event)"
-                (onDeSelect)="onFrequencyDeSelect($event)">
+                [placeholder]="'Select Frequency'">
               </ng-multiselect-dropdown>
             </div>
   
@@ -85,7 +77,7 @@
             </div>
   
             <div class="col-md-3 d-flex align-items-end">
-              <button class="btn btn-success w-100" (click)="saveFlightSchedule(scheduleForm)">
+              <button class="btn btn-success w-100">
                 <i class="bi bi-save"></i> Save Schedule
               </button>
             </div>
@@ -103,36 +95,37 @@
         <table class="table table-striped table-hover">
           <thead class="table-dark">
             <tr>
-              <th>Airline Code</th>
               <th>Flight Number</th>
-              <th>From</th>
+              <th>Airline Name</th>
+              <th>From City</th>
               <th>To</th>
-              <th>Frequency</th>
+              <!-- <th>Frequency</th> -->
+              <th>Departure Date</th>
               <th>Departure Time</th>
               <th>Arrival Time</th>
-              <th>Aircraft Number</th>
-              <th>Seat Count</th>
-              <th>Ticket Price</th>
+              <th>Status</th>
+              <!-- <th>Ticket Price</th> -->
               <th>Actions</th>
             </tr>
           </thead>
           <tbody>
             <tr *ngFor="let schedule of scheduleList">
-              <td>{{schedule.airline.airlineCode}}</td>
               <td>{{schedule.flightNumber}}</td>
-              <td>{{schedule.departureAirport}}</td>
-              <td>{{schedule.arrivalAirport}}</td>
-              <td>{{schedule.frequency}}</td>
+              <td>{{schedule.airlineName}}</td>
+              <td>{{schedule.fromCity}}</td>
+              <td>{{schedule.toCity}}</td>
+              <td>{{schedule.departureDate}}</td>
+              <!-- <td>{{schedule.frequency}}</td> -->
               <td>{{schedule.departureTime}}</td>
               <td>{{schedule.arrivalTime}}</td>
-              <td>{{schedule.aircraftRegistration}}</td>
-              <td>{{schedule.seatCount}}</td>
-              <td>{{schedule.ticketPrice}}</td>
+              <!-- <td>{{schedule.aircraftRegistration}}</td> -->
+              <td>{{schedule.status}}</td>
+              <!-- <td>{{schedule.price}}</td> -->
               <td>
-                <button class="btn btn-warning btn-sm me-2" (click)="openModal(editProfileModal, schedule)">
+                <button class="btn btn-warning btn-sm me-2" >
                   <i class="bi bi-pencil-fill"></i> Edit
                 </button>
-                <button class="btn btn-danger btn-sm" (click)="deleteSchedule(schedule)">
+                <button class="btn btn-danger btn-sm">
                   <i class="bi bi-trash-fill"></i> Delete
                 </button>
               </td>
@@ -152,15 +145,13 @@
     </div>
   
     <div class="modal-body">
-      <form [formGroup]="updateScheduleForm" (ngSubmit)="updateFlightSchedule(updateScheduleForm)">
+      <form [formGroup]="scheduleForm">
         <div class="row g-3">
           <input type="hidden" formControlName="id">
   
           <div class="col-md-6">
             <label class="form-label">Airline Code</label>
-            <ng-multiselect-dropdown formControlName="airline"
-              [settings]="updateAirlineCodeDropdownSettings"
-              [data]="updateAirlineCodeDropdownList">
+            <ng-multiselect-dropdown formControlName="airline">
             </ng-multiselect-dropdown>
           </div>
   
@@ -190,7 +181,7 @@
           </div>
   
           <div class="modal-footer">
-            <button type="button" class="btn btn-secondary" (click)="modal.dismiss()">Close</button>
+            <button type="button" class="btn btn-secondary">Close</button>
             <button type="submit" class="btn btn-primary">Save Changes</button>
           </div>
         </div>

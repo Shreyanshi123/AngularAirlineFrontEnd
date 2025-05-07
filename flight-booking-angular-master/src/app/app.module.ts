@@ -21,6 +21,7 @@ import { NgbModule } from '@ng-bootstrap/ng-bootstrap';
 import { DatePipe } from '@angular/common';
 import { AuthInterceptorProviders } from './helper/auth.interceptor';
 import { NgMultiSelectDropDownModule } from 'ng-multiselect-dropdown';
+import { SearchComponent } from './search/search.component';
 
 
 @NgModule({
@@ -35,7 +36,8 @@ import { NgMultiSelectDropDownModule } from 'ng-multiselect-dropdown';
     ManageComponent,
     DashboardComponent,
     ScheduleComponent,
-    CouponsComponent
+    CouponsComponent,
+    SearchComponent
   ],
   imports: [
     BrowserModule,

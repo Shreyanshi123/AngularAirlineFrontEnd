@@ -9,6 +9,7 @@ import { DatePipe } from '@angular/common'
 import { IDropdownSettings } from 'ng-multiselect-dropdown';
 import { FlightSchedule } from '../model/schedule.model';
 import { RestcallService } from '../services/rest-calls/restcall.service';
+import { ReactiveFormsModule, FormGroup,FormBuilder, Validators } from '@angular/forms';
 
 @Component({
   selector: 'app-home',
@@ -23,11 +24,14 @@ departureDate: string = '';
 returnDate: string = '';
   booking = "oneway";
   exampleFlag = true;
-  flights: any = [];
+ 
   edited = false;
   value: any;
   flightDetails = {};
   merge: any;
+  flightSearchForm: FormGroup;
+  flights: any[] = [];
+
   flightScheduleList:any = [];
 
   departureAirportDropdownSettings:IDropdownSettings = {};
@@ -43,6 +47,7 @@ returnDate: string = '';
 
   constructor(public datepipe: DatePipe,
     private flightService: FlightService,
+    private fb: FormBuilder,
     private authService: AuthenticationService, 
     private router: Router, 
     private datapass: PassingdataService,
@@ -50,6 +55,11 @@ returnDate: string = '';
     private datePipe: DatePipe) {
 
     this.value = "";
+    this.flightSearchForm = this.fb.group({
+      departureAirport: ['', Validators.required],
+      arrivalAirport: ['', Validators.required],
+      departureDate: ['', Validators.required]
+    });
 
   }
 
@@ -81,73 +91,100 @@ returnDate: string = '';
       });
     });
   }
-  async searchFlights(form: NgForm): Promise<void> {
-    console.log(form.value)
-    if (form.value.depatureDate == '' || form.value.departureAirport.legth == 0 || form.value.arrivalAirport.legth == 0 || form.value.returnDate == '' || form.value.passengerCount == '') {
-      this.edited = false;
-      Swal.fire('Mandatory fields required!');
-    } else if (form.value.departureAirport[0].item_text == form.value.arrivalAirport[0].item_text) {
-      Swal.fire('Choose different origin & destination');
+
+  searchFlights(): void {
+    if (this.flightSearchForm.invalid) {
+      Swal.fire('Please fill in all required fields');
+      return;
     }
-    else {
-      this.edited = true;
-      //form.value.depatureDate = new Date();
-      form.value.depatureDate = this.datepipe.transform(form.value.depatureDate, 'dd-MM-yyyy');
-      if(this.booking == "oneway"){
-        console.log("enter")
-        form.value.returnDate = null;
-      }
-      else{
-        //form.value.returnDate = new Date();
-        form.value.returnDate = this.datepipe.transform(form.value.returnDate, 'dd-MM-yyyy');
-        //this.value.returnDate = form.value.returnDate;
-      }     
-      // this.flightService.searchFlight(form.value.departureAirport, form.value.arrivalAirport,form.value.depatureDate,form.value.returnDate).subscribe((result) => {
-      //   this.flights = result;
-      //   this.value = form.value;
-      // }, (err) => {
-      //   console.log(err);
-      // });
-      this.flights = [];
-      this.flightScheduleList = await this.getAllFlightSchedules();
-      if(this.booking == "oneway"){
-        let frequencyArray;
-        let departureDay;
-        console.log(this.flightScheduleList);
-        for (let flightSchedule of this.flightScheduleList) {
-          frequencyArray = Array.from(flightSchedule.frequency.toString()).map(Number);
-          departureDay = new Date(form.value.departureDate).getDay()+1;
-          if (frequencyArray.includes(departureDay) &&
-          flightSchedule.departureAirport == form.value.departureAirport[0].item_text &&
-          flightSchedule.arrivalAirport == form.value.arrivalAirport[0].item_text) {
-            flightSchedule.duration = this.getDifferenceInHours(new Date(flightSchedule.arrivalTime), new Date(flightSchedule.departureTime));
-            flightSchedule.departureTime = this.datePipe.transform(new Date(flightSchedule.departureTime), 'HH:mm');
-            flightSchedule.arrivalTime = this.datePipe.transform(new Date(flightSchedule.arrivalTime), 'HH:mm'); 
-            this.flights.push(flightSchedule);
-          }
+
+    const formData = this.flightSearchForm.value;
+    formData.departureDate = this.datePipe.transform(formData.departureDate, 'yyyy-MM-dd');
+
+    this.flightService.searchFlight(formData.departureAirport, formData.arrivalAirport, formData.departureDate)
+      .subscribe(
+        (result: any) => { 
+          console.log("API Response in HomeComponent:", result);
+          this.flights = result.length ? result : [];
+          Swal.fire('Flights fetched successfully!');
+          this.router.navigate(['/search'],{ state: { flights: result } });
+
+        },
+        (error) => {
+          console.error('Error fetching flights:', error);
+          Swal.fire('Failed to fetch flights. Try again later.');
         }
-      } else {
-        let frequencyArray;
-        let departureDay;
-        let returneDay;
-        console.log(this.flightScheduleList);
-        for (let flightSchedule of this.flightScheduleList) {
-          frequencyArray = Array.from(flightSchedule.frequency.toString()).map(Number);
-          departureDay = new Date(form.value.departureDate).getDay()+1;
-          returneDay = new Date(form.value.returnDate).getDay()+1;
-          if ( (frequencyArray.includes(departureDay) || frequencyArray.includes(returneDay)) &&
-          (flightSchedule.departureAirport == form.value.departureAirport[0].item_text &&
-          (flightSchedule.arrivalAirport == form.value.arrivalAirport[0].item_text) || (flightSchedule.departureAirport == form.value.arrivalAirport[0].item_text &&
-            flightSchedule.arrivalAirport == form.value.departureAirport[0].item_text)) ) {
-              flightSchedule.duration = this.getDifferenceInHours(new Date(flightSchedule.arrivalTime), new Date(flightSchedule.departureTime));
-              flightSchedule.departureTime = this.datePipe.transform(new Date(flightSchedule.departureTime), 'HH:mm');
-              flightSchedule.arrivalTime = this.datePipe.transform(new Date(flightSchedule.arrivalTime), 'HH:mm');  
-              this.flights.push(flightSchedule);
-          }
-        }   
-      }
-    }
+      );
   }
+
+
+  // async searchFlights(form: NgForm): Promise<void> {
+  //   console.log(form.value)
+  //   if (form.value.depatureDate == '' || form.value.departureAirport.legth == 0 || form.value.arrivalAirport.legth == 0 || form.value.returnDate == '' || form.value.passengerCount == '') {
+  //     this.edited = false;
+  //     Swal.fire('Mandatory fields required!');
+  //   } else if (form.value.departureAirport[0].item_text == form.value.arrivalAirport[0].item_text) {
+  //     Swal.fire('Choose different origin & destination');
+  //   }
+  //   else {
+  //     this.edited = true;
+  //     //form.value.depatureDate = new Date();
+  //     form.value.depatureDate = this.datepipe.transform(form.value.depatureDate, 'dd-MM-yyyy');
+  //     if(this.booking == "oneway"){
+  //       console.log("enter")
+  //       form.value.returnDate = null;
+  //     }
+  //     else{
+  //       //form.value.returnDate = new Date();
+  //       form.value.returnDate = this.datepipe.transform(form.value.returnDate, 'dd-MM-yyyy');
+  //       //this.value.returnDate = form.value.returnDate;
+  //     }     
+  //     // this.flightService.searchFlight(form.value.departureAirport, form.value.arrivalAirport,form.value.depatureDate,form.value.returnDate).subscribe((result) => {
+  //     //   this.flights = result;
+  //     //   this.value = form.value;
+  //     // }, (err) => {
+  //     //   console.log(err);
+  //     // });
+  //     this.flights = [];
+  //     this.flightScheduleList = await this.getAllFlightSchedules();
+  //     if(this.booking == "oneway"){
+  //       let frequencyArray;
+  //       let departureDay;
+  //       console.log(this.flightScheduleList);
+  //       for (let flightSchedule of this.flightScheduleList) {
+  //         frequencyArray = Array.from(flightSchedule.frequency.toString()).map(Number);
+  //         departureDay = new Date(form.value.departureDate).getDay()+1;
+  //         if (frequencyArray.includes(departureDay) &&
+  //         flightSchedule.departureAirport == form.value.departureAirport[0].item_text &&
+  //         flightSchedule.arrivalAirport == form.value.arrivalAirport[0].item_text) {
+  //           flightSchedule.duration = this.getDifferenceInHours(new Date(flightSchedule.arrivalTime), new Date(flightSchedule.departureTime));
+  //           flightSchedule.departureTime = this.datePipe.transform(new Date(flightSchedule.departureTime), 'HH:mm');
+  //           flightSchedule.arrivalTime = this.datePipe.transform(new Date(flightSchedule.arrivalTime), 'HH:mm'); 
+  //           this.flights.push(flightSchedule);
+  //         }
+  //       }
+  //     } else {
+  //       let frequencyArray;
+  //       let departureDay;
+  //       let returneDay;
+  //       console.log(this.flightScheduleList);
+  //       for (let flightSchedule of this.flightScheduleList) {
+  //         frequencyArray = Array.from(flightSchedule.frequency.toString()).map(Number);
+  //         departureDay = new Date(form.value.departureDate).getDay()+1;
+  //         returneDay = new Date(form.value.returnDate).getDay()+1;
+  //         if ( (frequencyArray.includes(departureDay) || frequencyArray.includes(returneDay)) &&
+  //         (flightSchedule.departureAirport == form.value.departureAirport[0].item_text &&
+  //         (flightSchedule.arrivalAirport == form.value.arrivalAirport[0].item_text) || (flightSchedule.departureAirport == form.value.arrivalAirport[0].item_text &&
+  //           flightSchedule.arrivalAirport == form.value.departureAirport[0].item_text)) ) {
+  //             flightSchedule.duration = this.getDifferenceInHours(new Date(flightSchedule.arrivalTime), new Date(flightSchedule.departureTime));
+  //             flightSchedule.departureTime = this.datePipe.transform(new Date(flightSchedule.departureTime), 'HH:mm');
+  //             flightSchedule.arrivalTime = this.datePipe.transform(new Date(flightSchedule.arrivalTime), 'HH:mm');  
+  //             this.flights.push(flightSchedule);
+  //         }
+  //       }   
+  //     }
+  //   }
+  // }
 
   bookFlight(flight: any) {
     this.datapass.setData(flight);

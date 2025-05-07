@@ -6,19 +6,17 @@
       <span>First Class</span>
     </div>
 
-    <form #bookingForm="ngForm" (ngSubmit)="searchFlights(bookingForm)">
-      <div class="form__group">
-        <span><i class="ri-map-pin-line"></i></span>
-        <div class="input__content">
-          <div class="input__group">
-            <input type="text" [(ngModel)]="departureAirportDropdownModel" name="departureAirport" required />
-            <label>Location</label>
-          </div>
-          <p>Where are you going?</p>
-        </div>
-      </div>
+   
+     
+    <form [formGroup]="flightSearchForm" (ngSubmit)="searchFlights()">
+      <input type="text" formControlName="departureAirport" placeholder="From">
+      <input type="text" formControlName="arrivalAirport" placeholder="To">
+      <input type="date" formControlName="departureDate">
+      <button type="submit">Search Flights</button>
+    </form>
+     
 
-      <div class="form__group">
+       <!-- <div class="form__group">
         <span><i class="ri-user-3-line"></i></span>
         <div class="input__content">
           <div class="input__group">
@@ -27,33 +25,20 @@
           </div>
           <p>Add guests</p>
         </div>
-      </div>
+      </div> -->
 
-      <div class="form__group">
-        <span><i class="ri-calendar-line"></i></span>
-        <div class="input__content">
-          <div class="input__group">
-            <input type="date" [(ngModel)]="departureDate" name="departureDate" required />
-            <label>Departure</label>
-          </div>
-          <p>Add date</p>
-        </div>
-      </div>
-
-      <div class="form__group">
+      <!-- <div class="form__group">
         <span><i class="ri-calendar-line"></i></span>
         <div class="input__content">
           <div class="input__group">
             <input type="date" [(ngModel)]="returnDate" name="returnDate" />
-            <label>Return</label>
-          </div>
+            <label>Return</label> -->
+          <!-- </div>
           <p>Add date</p>
         </div>
-      </div>
+      </div> -->
 
-      <button class="btn" type="submit"><i class="ri-search-line"></i></button>
-    </form>
- 
+     
 
 
   <section class="section__container plan__container">

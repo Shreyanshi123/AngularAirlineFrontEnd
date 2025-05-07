@@ -1,27 +1,53 @@
 import { Injectable } from '@angular/core';
-import { Observable } from 'rxjs';
+import { Observable,throwError  } from 'rxjs';
 import { HttpClient, HttpParams, HttpHeaders } from '@angular/common/http';
 import { Airline } from '../../model/airline.model';
 import { Coupon } from '../../model/coupon.model';
 import { environment } from 'src/environments/environment';
 import { AuthenticationService } from '../auth/authentication.service';
+import { tap,catchError } from 'rxjs/operators';
 
 @Injectable({
   providedIn: 'root'
 })
 export class FlightService {
-  private baseUrl = environment.baseUrl;
+  private baseUrl = 'https://localhost:7261/api/Flights';
   token: any;
   username: any;
   constructor(private http: HttpClient, private authService: AuthenticationService) { }
+  searchFlight(from: string, to: string, departureDate: string): Observable<any> {
+    // Ensure the date format matches backend expectations
+    const formattedDate = departureDate.split("T")[0];
 
-  searchFlight(from: string, to: string, depatureDate: string, returnDate: string): Observable<Object> {
-    let params = new HttpParams();
-    params = params.append('origin', from);
-    params = params.append('destination', to);
-    params = params.append('depature', depatureDate);
-    params = params.append('return', returnDate);
-    return this.http.get(`${this.baseUrl}/search`, { params: params });
+    const params = new HttpParams()
+      .set('from', from)
+      .set('to', to)
+      .set('date', formattedDate);
+
+    console.log("Requesting flights from:", `${this.baseUrl}/search`);
+    console.log("Params:", params.toString());
+
+    return this.http.get(`${this.baseUrl}/search`, { params }).pipe(
+      tap(response => {
+        console.log("API Response in FlightService:", response);
+      }),
+      catchError(error => {
+        console.error("API Call Failed:", error);
+        return throwError(error);
+      })
+    );
+  }
+
+  deleteFlightSchedule(flightId: number): Observable<any> {
+    const url = `${this.baseUrl}/delete/${flightId}`;
+    console.log("Deleting flight schedule:", url);
+
+    return this.http.delete(url).pipe(
+      catchError(error => {
+        console.error("API Call Failed:", error);
+        return throwError(error);
+      })
+    );
   }
 
   saveTravellerDetails(traveller: any) {
@@ -70,26 +96,7 @@ export class FlightService {
     return this.http.post(`${this.baseUrl}`, airlineDetails, { headers: header });
   }
 
-  getAirline() {
-    let header = new HttpHeaders()
-      .set('Authorization', 'Bearer ' + this.authService.getData("authToken") || '')
-      .set('Access-Control-Allow-Origin', '*');
-    return this.http.get<Airline>(`${this.baseUrl}/airline/getAll`, { headers: header });
-  }
+ 
 
-  updateAirline(id: any, data: Airline) {
-    let header = new HttpHeaders()
-      .set('Content-type', 'application/json')
-      .set('Authorization', 'Bearer ' + this.authService.getData("authToken") || '')
-      .set('Access-Control-Allow-Origin', '*');
-    return this.http.put(`${this.baseUrl}/${id}`, data, { headers: header });
-  }
-
-  getAirlineWithParams(airlineName: string) {
-    let header = new HttpHeaders()
-      .set('Authorization', 'Bearer ' + this.authService.getData("authToken") || '')
-      .set('Access-Control-Allow-Origin', '*');
-    return this.http.get<Airline>(`${this.baseUrl}/${airlineName}`, { headers: header });
-  }
 
 }

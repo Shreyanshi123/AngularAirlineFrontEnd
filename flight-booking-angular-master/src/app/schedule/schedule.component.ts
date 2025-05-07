@@ -83,6 +83,16 @@ export class ScheduleComponent implements OnInit {
 
   ngOnInit(): void {
     this.getAllFlightSchedules();
+    this.scheduleService.getSchedule()
+        .subscribe({
+          next:(data:any)=>{
+            console.log(data);
+            this.scheduleList=data;
+          },
+          error:(err) =>{
+            console.log(err);
+          },
+        })
     this.initiateMultiDropdownMetaData();
   }
 
@@ -107,11 +117,11 @@ export class ScheduleComponent implements OnInit {
     });
   }
 
-  onOptionsSelected(value: string) {
-    this.flightService.getAirlineWithParams(value).subscribe(resp => {
-      this.airlineCode = resp;
-    })
-  }
+  // onOptionsSelected(value: string) {
+  //   this.flightService.getAirlineWithParams(value).subscribe(resp => {
+  //     this.airlineCode = resp;
+  //   })
+  // }
 
   saveFlightSchedule(scheduleForm: any) {
     if (this.scheduleForm.valid) {
